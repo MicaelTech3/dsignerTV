@@ -8,7 +8,7 @@ const firebaseConfig = {
     appId: "1:930311416952:web:d0e7289f0688c46492d18d"
 };
 
-// Initialize Firebase sem autenticação
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -18,28 +18,22 @@ const elements = {
     playerMode: document.getElementById('player-mode'),
     activationKey: document.getElementById('activation-key'),
     viewBtn: document.getElementById('view-btn'),
-    generateNewKeyBtn: document.getElementById('generate-new-key'),
     exitBtn: document.getElementById('exit-btn'),
-    mediaInfo: document.getElementById('media-info'),
-    playerStatus: document.getElementById('player-status'),
     mediaDisplay: document.getElementById('media-display')
 };
 
 // State Variables
 let currentKey = loadKey();
 let unsubscribe = null;
-let showInfo = false;
 let currentMedia = null;
 
 // Initial Setup
 elements.activationKey.textContent = currentKey;
-updateGenStatus('Ready to use', 'online');
+updateGenStatus('Pronto para uso', 'online');
 
 // Event Listeners
-elements.viewBtn.addEventListener('click', toggleViewMode);
-elements.generateNewKeyBtn.addEventListener('click', generateNewKey);
+elements.viewBtn.addEventListener('click', enterPlayerMode);
 document.addEventListener('keydown', handleKeyboardShortcuts);
-elements.playerMode.addEventListener('mousemove', showExitButton);
 elements.exitBtn.addEventListener('click', exitPlayerMode);
 
 // Utility Functions
@@ -61,25 +55,9 @@ function generateKey() {
     return key;
 }
 
-function generateNewKey() {
-    currentKey = generateKey();
-    localStorage.setItem('deviceKey', currentKey);
-    elements.activationKey.textContent = currentKey;
-    stopListening();
-}
-
-function toggleViewMode() {
-    if (elements.playerMode.style.display === 'none') {
-        enterPlayerMode();
-    } else {
-        exitPlayerMode();
-    }
-}
-
 function enterPlayerMode() {
     elements.generatorMode.style.display = 'none';
     elements.playerMode.style.display = 'block';
-    elements.viewBtn.textContent = 'Return to Generator';
     initPlayerMode(currentKey);
     enterFullscreen();
 }
@@ -88,7 +66,6 @@ function exitPlayerMode() {
     exitFullscreen();
     elements.playerMode.style.display = 'none';
     elements.generatorMode.style.display = 'flex';
-    elements.viewBtn.textContent = 'View Content';
     stopListening();
 }
 
@@ -100,8 +77,6 @@ function enterFullscreen() {
     else if (element.msRequestFullscreen) element.msRequestFullscreen();
 
     document.body.classList.add('fullscreen-mode');
-    showInfo = false;
-    updateInfoVisibility();
 }
 
 function exitFullscreen() {
@@ -114,23 +89,10 @@ function exitFullscreen() {
     }
 
     document.body.classList.remove('fullscreen-mode');
-    showInfo = true;
-    updateInfoVisibility();
-}
-
-function updateInfoVisibility() {
-    elements.mediaInfo.style.display = showInfo ? 'block' : 'none';
-    elements.playerStatus.style.display = showInfo ? 'block' : 'none';
 }
 
 function updateGenStatus(message, status) {
     const el = document.getElementById('gen-status');
-    el.textContent = message;
-    el.className = `connection-status ${status}`;
-}
-
-function updatePlayerStatus(message, status) {
-    const el = document.getElementById('player-status');
     el.textContent = message;
     el.className = `connection-status ${status}`;
 }
@@ -150,13 +112,9 @@ function clearMedia() {
 
 // Player Mode Functions
 function initPlayerMode(key) {
-    updatePlayerStatus('Connecting...', 'offline');
-    showInfo = false;
-    updateInfoVisibility();
-
+    updatePlayerStatus('Conectando...', 'offline');
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
     startPublicListening(key);
 }
 
@@ -170,8 +128,8 @@ function handleOffline() {
 }
 
 function startPublicListening(key) {
-    console.log('Listening to:', 'midia/' + key);
-    updatePlayerStatus('Connecting...', 'offline');
+    console.log('Ouvindo:', 'midia/' + key);
+    updatePlayerStatus('Conectando...', 'offline');
     stopListening();
 
     unsubscribe = db.ref('midia/' + key).on('value', 
@@ -191,6 +149,7 @@ function startPublicListening(key) {
 
 function handleMediaUpdate(snapshot) {
     const media = snapshot.val();
+    if (JSON.stringify(currentMedia) === JSON.stringify(media)) return; // Evita recarregar a mesma mídia
     currentMedia = media;
     console.log('Mídia recebida:', media);
 
@@ -210,11 +169,6 @@ function handleMediaUpdate(snapshot) {
         img.src = media.url;
         img.onerror = () => showError('Erro ao carregar a imagem');
         elements.mediaDisplay.appendChild(img);
-        setTimeout(() => {
-            if (currentMedia === media && media.duration) {
-                clearMedia();
-            }
-        }, (media.duration || 10) * 1000);
     } else if (media.tipo === 'video') {
         const video = document.createElement('video');
         video.src = media.url;
@@ -234,14 +188,14 @@ function showError(message) {
 }
 
 function handleKeyboardShortcuts(e) {
-    if (e.key === 'Escape') exitPlayerMode();
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+        exitPlayerMode(); // Suporte para Backspace em TV box
+    }
 }
 
-function showExitButton() {
-    elements.exitBtn.style.opacity = '1';
-    setTimeout(() => {
-        elements.exitBtn.style.opacity = '0';
-    }, 2000);
+function updatePlayerStatus(message, status) {
+    // Status não será visível em TV box, mas mantido para depuração
+    console.log(`Status: ${message} (${status})`);
 }
 
 // CSS
@@ -272,24 +226,6 @@ style.textContent = `
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
-    }
-    .connection-status {
-        padding: 5px 10px;
-        border-radius: 5px;
-        color: white;
-    }
-    .connection-status.online {
-        background-color: #4CAF50;
-    }
-    .connection-status.offline {
-        background-color: #FF9800;
-    }
-    #exit-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        opacity: 0;
-        transition: opacity 0.3s;
     }
 `;
 document.head.appendChild(style);
