@@ -1,5 +1,3 @@
-// js/Painel.js
-
 // Referenciar window.authModule diretamente sem redeclarar variáveis
 const authModule = window.authModule;
 
@@ -118,7 +116,7 @@ const updateCategoryList = () => {
     console.log('Lista de categorias atualizada:', categories);
 };
 
-// Update TV Grid
+// Update TV Grid (Removido o botão de criar playlist)
 const updateTvGrid = () => {
     const tvGrid = document.getElementById('tv-grid');
     if (!tvGrid) {
@@ -149,7 +147,7 @@ const updateTvGrid = () => {
                     <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEzIDNoLTJ2MTBoMlYzem03IDhoLTRjLTEuMS0yLjQtMi41LTQuOC00LTYgMS4zLTEuMyAyLjYtMi4yIDQtMyAyLjIgMS4zIDMuNSAzIDQgNXoiLz48L3N2Zz4=" width="14" height="14">
                 </button>
                 <button class="tv-action-btn view-tv-btn" data-id="${tv.id}" title="Ver Mídia">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDQuNUM2LjUgNC41IDIgNy41IDIgMTJzNC41IDcuPSAxMCA3LjVjNS41IDAgMTAtMyAxMC03LjUtNC41LTcuNS0xMC03LjUtMTAuNXptMCAxMi41Yy0zLjggMC03LjItMi42LTguOS01LjUgMS43LTIuOSA1LjEtNS41IDguOS01LjVzNy4yIDIuNiA4LjkgNS41LTEuNyAyLjktNS4xIDUuNS04LjkuNXptMC0xMC41YzIuNSAwIDQuNSAyIDQuNSA0LjVzLTIgNC41LTQuNSA0LjUtNC41LTItNC41LTQuNSAyLTQuNSA0LjUtNC41eiIvPjwvc3ZnPg==" width="14" height="14">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDQuNUM2LjUgNC41IDIgNy41IDIgMTJzNC41IDcuNSAxMCA3LjVjNS41IDAgMTAtMyAxMC03LjUtNC41LTcuNS0xMC03LjUtMTAuNXptMCAxMi41Yy0zLjggMC03LjItMi42LTguOS01LjUgMS43LTIuOSA1LjEtNS41IDguOS01LjVzNy4yIDIuNiA4LjkgNS41LTEuNyAyLjktNS4xIDUuNS04LjkuNXptMC0xMC41YzIuNSAwIDQuNSAyIDQuNSA0LjVzLTIgNC41LTQuNSA0LjUtNC41LTItNC51LTQuNSAyLTQuNSA0LjUtNC41eiIvPjwvc3ZnPg==" width="14" height="14">
                 </button>
                 <button class="tv-action-btn upload-tv-btn" data-id="${tv.id}" title="Enviar mídia">
                     <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTkgMTZoNnYtNmg0bC03LTctNyA3aDR6bS00IDJoMTR2Mkg1eiIvPjwvc3ZnPg==" width="14" height="14">
@@ -166,7 +164,7 @@ const updateTvGrid = () => {
     });
 };
 
-// Upload Media to Storage
+// Upload Media to Storage (Limite de 100 MB)
 const uploadMediaToStorage = async (file, tvId) => {
     try {
         const fileExt = file.name.split('.').pop();
@@ -176,6 +174,11 @@ const uploadMediaToStorage = async (file, tvId) => {
         const progressBar = document.querySelector('.progress-bar');
         if (progressBar) progressBar.style.width = '0%';
         showToast(`Enviando: 0%`, 'info');
+
+        if (file.size > 100 * 1024 * 1024) {
+            showToast('Arquivo muito grande (máx. 100MB)', 'error');
+            throw new Error('Arquivo excede o limite de 100MB');
+        }
 
         const uploadTask = storageRef.put(file);
 
@@ -280,7 +283,182 @@ function displayTextMessage(content, color, bgColor, fontSize) {
     modal.style.display = 'block';
 }
 
-// Função para upload de mídia (declarada globalmente para o onclick)
+// Show TV Media (Com edição de playlist)
+function showTvMedia(tvId) {
+    const tv = tvs.find(t => t.id === tvId);
+    if (!tv) {
+        showToast('TV não encontrada', 'error');
+        return;
+    }
+
+    const modal = document.getElementById('view-media-modal');
+    const container = document.getElementById('media-container');
+    if (!modal || !container) return;
+
+    container.innerHTML = '';
+
+    if (tv.playlist && tv.playlist.length > 0) {
+        container.innerHTML = `
+            <h3>Playlist de ${tv.name}</h3>
+            <div id="playlist-view"></div>
+            <button id="add-to-playlist-btn" class="btn" data-tv-id="${tvId}">Adicionar Mídia</button>
+            <button id="update-playlist-btn" class="btn" data-tv-id="${tvId}">Atualizar Playlist</button>
+        `;
+        const playlistView = container.querySelector('#playlist-view');
+        let playlistItems = tv.playlist.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        const renderPlaylistView = () => {
+            playlistView.innerHTML = '';
+            playlistItems.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'playlist-item';
+                itemDiv.dataset.index = index;
+                itemDiv.innerHTML = `
+                    <img src="${item.type === 'video' ? 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE3IDMuNUgxMHYzLjVIMTdWMy41ek0xMiAxM3Y3LjVoNS41aDEuNWExLjUgMS41IDAgMCAxIDEuNSAxLjV2MS41YzAgLjgzLS42NyAxLjUtMS41IDEuNWgtMy41di0zLjVIMTdWMjEuNWgtM3YxLjVoLTN2LTEuNWgtM3YtMS41YzAtLjgzLjY3LTEuNSAxLjUtMS41aDEuNWgtMS41djcuNUg3di03LjVIM3YxLjVoLTEuNWMtLjgzIDAtMS41LS42Ny0xLjUtMS41di0xLjVjMC0uODMuNjctMS41IDEuNS0xLjVoMS41djcuNUgxMHYtNy41SDd2My41SDMuNWMtLjgzIDAtMS41LS42Ny0xLjUtMS41di0zLjVhMS41IDEuNSAwIDAgMSAxLjUtMS41aDMuNXYzLjVIMTB2LTMuNWgtM3YtMS41YzAtLjgzLjY3LTEuNSAxLjUtMS41aDEuNWgtMS41djMuNUgxN3YtMy41aC0zdi0xLjVjMC0uODMuNjctMS41IDEuNS0xLjVoMS41YzAgMCAzLjUgMCAzLjUgMHYzLjV6Ii8+PC9zdmc+' : item.url}" alt="${item.type}" style="width: 100px; height: 100px; object-fit: cover;">
+                    <div>
+                        <p>Tipo: ${item.type}</p>
+                        <p>Duração: <input type="number" class="playlist-duration" value="${item.duration || 10}" min="1" ${item.type === 'video' ? 'disabled' : ''}> seg</p>
+                        <button class="move-up-btn" ${index === 0 ? 'disabled' : ''}>⬆</button>
+                        <button class="move-down-btn" ${index === playlistItems.length - 1 ? 'disabled' : ''}>⬇</button>
+                        <button class="remove-item-btn">🗑</button>
+                    </div>
+                `;
+                playlistView.appendChild(itemDiv);
+            });
+        };
+
+        renderPlaylistView();
+
+        playlistView.addEventListener('click', (e) => {
+            const index = parseInt(e.target.closest('.playlist-item')?.dataset.index);
+            if (isNaN(index)) return;
+
+            if (e.target.classList.contains('move-up-btn') && index > 0) {
+                [playlistItems[index], playlistItems[index - 1]] = [playlistItems[index - 1], playlistItems[index]];
+                playlistItems.forEach((item, i) => item.order = i);
+                renderPlaylistView();
+            } else if (e.target.classList.contains('move-down-btn') && index < playlistItems.length - 1) {
+                [playlistItems[index], playlistItems[index + 1]] = [playlistItems[index + 1], playlistItems[index]];
+                playlistItems.forEach((item, i) => item.order = i);
+                renderPlaylistView();
+            } else if (e.target.classList.contains('remove-item-btn')) {
+                playlistItems.splice(index, 1);
+                playlistItems.forEach((item, i) => item.order = i);
+                renderPlaylistView();
+            }
+        });
+
+        playlistView.addEventListener('input', (e) => {
+            const index = parseInt(e.target.closest('.playlist-item')?.dataset.index);
+            if (e.target.classList.contains('playlist-duration')) {
+                const duration = parseInt(e.target.value);
+                if (duration >= 1) {
+                    playlistItems[index].duration = duration;
+                }
+            }
+        });
+
+        document.getElementById('add-to-playlist-btn').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*,video/mp4,.gif';
+            input.multiple = true;
+            input.onchange = async (e) => {
+                const files = Array.from(e.target.files);
+                for (const file of files) {
+                    if (file.size > 100 * 1024 * 1024) {
+                        showToast(`Arquivo ${file.name} excede 100MB`, 'error');
+                        continue;
+                    }
+                    const url = await uploadMediaToStorage(file, tvId);
+                    const type = file.type.startsWith('video/') ? 'video' : file.type === 'image/gif' ? 'gif' : 'image';
+                    playlistItems.push({
+                        url,
+                        type,
+                        duration: type === 'video' ? null : 10,
+                        order: playlistItems.length
+                    });
+                }
+                renderPlaylistView();
+            };
+            input.click();
+        });
+
+        document.getElementById('update-playlist-btn').addEventListener('click', async () => {
+            tv.playlist = playlistItems;
+            saveLocalData();
+
+            if (isOnline()) {
+                try {
+                    await authModule.database.ref(`tvs/${tvId}`).update({
+                        playlist: playlistItems,
+                        lastUpdate: Date.now()
+                    });
+
+                    if (tv.activationKey) {
+                        await authModule.database.ref('midia/' + tv.activationKey).set({
+                            tipo: 'playlist',
+                            items: playlistItems,
+                            timestamp: Date.now()
+                        });
+                    }
+
+                    showToast('Playlist atualizada com sucesso!', 'success');
+                    modal.style.display = 'none';
+                } catch (error) {
+                    console.error('Erro ao atualizar playlist:', error);
+                    showToast('Erro ao atualizar playlist', 'error');
+                }
+            } else {
+                showToast('Playlist atualizada localmente (offline)', 'info');
+            }
+        });
+    } else if (tv.media) {
+        if (tv.media.type === 'text') {
+            displayTextMessage(
+                tv.media.content,
+                tv.media.color,
+                tv.media.bgColor,
+                tv.media.fontSize
+            );
+        } else if (tv.media.type === 'image') {
+            const img = document.createElement('img');
+            img.src = tv.media.url;
+            img.style.maxWidth = '100%';
+            img.onerror = () => showToast('Erro ao carregar a imagem', 'error');
+            container.appendChild(img);
+        } else if (tv.media.type === 'video') {
+            if (tv.media.url.includes('youtube.com') || tv.media.url.includes('youtu.be')) {
+                const videoId = tv.media.url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)?.[1];
+                if (videoId) {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=${tv.media.loop ? 1 : 0}`;
+                    iframe.style.width = '100%';
+                    iframe.style.height = '400px';
+                    iframe.frameBorder = '0';
+                    iframe.allow = 'autoplay; encrypted-media';
+                    container.appendChild(iframe);
+                }
+            } else {
+                const video = document.createElement('video');
+                video.src = tv.media.url;
+                video.controls = true;
+                video.loop = tv.media.loop || false;
+                video.style.maxWidth = '100%';
+                video.autoplay = true;
+                video.onerror = () => showToast('Erro ao carregar o vídeo', 'error');
+                video.oncanplay = () => video.play().catch(e => console.error('Erro ao reproduzir:', e));
+                container.appendChild(video);
+            }
+        }
+    } else {
+        showToast('Nenhuma mídia ou playlist enviada para esta TV', 'info');
+    }
+
+    modal.style.display = 'block';
+}
+
+// Função para upload de mídia (Adicionada opção de playlist)
 window.uploadMidia = async function() {
     try {
         const tvId = document.getElementById('upload-media-btn')?.dataset.tvId;
@@ -318,8 +496,8 @@ window.uploadMidia = async function() {
                 return;
             }
 
-            if (file.size > 10 * 1024 * 1024) {
-                showToast('Arquivo muito grande (máx. 10MB)', 'error');
+            if (file.size > 100 * 1024 * 1024) {
+                showToast('Arquivo muito grande (máx. 100MB)', 'error');
                 return;
             }
 
@@ -358,6 +536,58 @@ window.uploadMidia = async function() {
                 url: mediaUrl,
                 timestamp: Date.now()
             };
+        } else if (mediaType === 'playlist') {
+            const fileInput = document.getElementById('playlist-files');
+            const files = fileInput?.files;
+
+            if (!files || files.length === 0) {
+                showToast('Selecione pelo menos um arquivo para a playlist', 'error');
+                return;
+            }
+
+            const playlistItems = [];
+            for (const file of Array.from(files)) {
+                if (file.size > 100 * 1024 * 1024) {
+                    showToast(`Arquivo ${file.name} excede 100MB`, 'error');
+                    continue;
+                }
+                const url = await uploadMediaToStorage(file, tvId);
+                const type = file.type.startsWith('video/') ? 'video' : file.type === 'image/gif' ? 'gif' : 'image';
+                playlistItems.push({
+                    url,
+                    type,
+                    duration: type === 'video' ? null : 10,
+                    order: playlistItems.length
+                });
+            }
+
+            if (playlistItems.length === 0) {
+                showToast('Nenhum arquivo válido para a playlist', 'error');
+                return;
+            }
+
+            tv.playlist = playlistItems;
+            saveLocalData();
+
+            if (isOnline()) {
+                await authModule.database.ref(`tvs/${tvId}`).update({
+                    playlist: playlistItems,
+                    lastUpdate: Date.now()
+                });
+
+                if (tv.activationKey) {
+                    await authModule.database.ref('midia/' + tv.activationKey).set({
+                        tipo: 'playlist',
+                        items: playlistItems,
+                        timestamp: Date.now()
+                    });
+                }
+            }
+
+            showToast('Playlist enviada com sucesso! Veja em "Ver Mídia" para ajustar.', 'success');
+            const modal = document.getElementById('upload-media-modal');
+            if (modal) modal.style.display = 'none';
+            return;
         }
 
         tv.media = mediaData;
@@ -397,61 +627,6 @@ window.uploadMidia = async function() {
         showToast('Falha no envio: ' + error.message, 'error');
     }
 };
-
-// Função para exibir a mídia
-function showTvMedia(tvId) {
-    const tv = tvs.find(t => t.id === tvId);
-    if (!tv?.media) {
-        showToast('Nenhuma mídia enviada para esta TV', 'info');
-        return;
-    }
-
-    const modal = document.getElementById('view-media-modal');
-    const container = document.getElementById('media-container');
-    if (!modal || !container) return;
-
-    container.innerHTML = '';
-
-    if (tv.media.type === 'text') {
-        displayTextMessage(
-            tv.media.content,
-            tv.media.color,
-            tv.media.bgColor,
-            tv.media.fontSize
-        );
-    } else if (tv.media.type === 'image') {
-        const img = document.createElement('img');
-        img.src = tv.media.url;
-        img.style.maxWidth = '100%';
-        img.onerror = () => showToast('Erro ao carregar a imagem', 'error');
-        container.appendChild(img);
-    } else if (tv.media.type === 'video') {
-        if (tv.media.url.includes('youtube.com') || tv.media.url.includes('youtu.be')) {
-            const videoId = tv.media.url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)?.[1];
-            if (videoId) {
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=${tv.media.loop ? 1 : 0}`;
-                iframe.style.width = '100%';
-                iframe.style.height = '400px';
-                iframe.frameBorder = '0';
-                iframe.allow = 'autoplay; encrypted-media';
-                container.appendChild(iframe);
-            }
-        } else {
-            const video = document.createElement('video');
-            video.src = tv.media.url;
-            video.controls = true;
-            video.loop = tv.media.loop || false;
-            video.style.maxWidth = '100%';
-            video.autoplay = true;
-            video.onerror = () => showToast('Erro ao carregar o vídeo', 'error');
-            video.oncanplay = () => video.play().catch(e => console.error('Erro ao reproduzir:', e));
-            container.appendChild(video);
-        }
-    }
-
-    modal.style.display = 'block';
-}
 
 // Main Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
@@ -751,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Upload Media
+    // Upload Media (Com opção de playlist)
     document.addEventListener('click', e => {
         const uploadBtn = e.target.closest('.upload-tv-btn');
         if (uploadBtn) {
@@ -781,8 +956,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const textGroup = document.getElementById('text-options');
                 const imageOptions = document.getElementById('image-options');
                 const videoOptions = document.getElementById('video-options');
+                const playlistGroup = document.getElementById('playlist-group');
 
-                if (mediaTypeSelect && fileGroup && linkGroup && textGroup && imageOptions && videoOptions) {
+                if (!playlistGroup) {
+                    console.error('Elemento #playlist-group não encontrado no HTML');
+                }
+
+                if (mediaTypeSelect && fileGroup && linkGroup && textGroup && imageOptions && videoOptions && playlistGroup) {
+                    mediaTypeSelect.innerHTML = `
+                        <option value="text">Texto</option>
+                        <option value="image">Imagem</option>
+                        <option value="video">Vídeo</option>
+                        <option value="link">Link</option>
+                        <option value="playlist">Playlist</option>
+                    `;
+
                     mediaTypeSelect.addEventListener('change', () => {
                         const type = mediaTypeSelect.value;
                         fileGroup.style.display = type === 'image' || type === 'video' ? 'block' : 'none';
@@ -790,6 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         textGroup.style.display = type === 'text' ? 'block' : 'none';
                         imageOptions.style.display = type === 'image' ? 'block' : 'none';
                         videoOptions.style.display = type === 'video' ? 'block' : 'none';
+                        playlistGroup.style.display = type === 'playlist' ? 'block' : 'none';
                     });
 
                     document.getElementById('media-file').addEventListener('change', function(e) {
@@ -806,6 +995,31 @@ document.addEventListener('DOMContentLoaded', () => {
                             preview.style.display = 'none';
                         }
                     });
+
+                    const playlistFilesInput = document.getElementById('playlist-files');
+                    if (playlistFilesInput) {
+                        playlistFilesInput.addEventListener('change', function(e) {
+                            const files = Array.from(e.target.files);
+                            const preview = document.getElementById('media-preview');
+                            if (preview) {
+                                preview.innerHTML = '';
+                                files.forEach(file => {
+                                    if (file.type.startsWith('image/')) {
+                                        const reader = new FileReader();
+                                        reader.onload = function(event) {
+                                            const img = document.createElement('img');
+                                            img.src = event.target.result;
+                                            img.style.maxWidth = '100px';
+                                            img.style.margin = '5px';
+                                            preview.appendChild(img);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                });
+                                preview.style.display = 'block';
+                            }
+                        });
+                    }
                 }
             }
         }
