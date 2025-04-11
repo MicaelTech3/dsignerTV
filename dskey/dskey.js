@@ -172,11 +172,22 @@ function handleMediaUpdate(snapshot) {
     } else if (media.tipo === 'video') {
         const video = document.createElement('video');
         video.src = media.url;
-        video.controls = false;
         video.autoplay = true;
+        video.muted = true; // Necessário para autoplay em alguns dispositivos
+        video.playsinline = true; // Evita modo tela cheia nativo
+        video.controls = false;
         video.loop = media.loop || false;
-        video.onerror = () => showError('Erro ao carregar o vídeo');
-        video.onloadeddata = () => video.play().catch(e => console.error('Erro ao reproduzir vídeo:', e));
+        video.onerror = () => {
+            console.error('Erro ao carregar vídeo:', media.url);
+            showError('Erro ao carregar o vídeo');
+        };
+        video.onloadeddata = () => {
+            console.log('Vídeo carregado:', media.url);
+            video.play().catch(e => {
+                console.error('Erro ao iniciar vídeo:', e);
+                showError('Falha ao reproduzir o vídeo');
+            });
+        };
         elements.mediaDisplay.appendChild(video);
     } else if (media.tipo === 'activation' || media.tipo === 'status') {
         showError('Nenhum conteúdo para exibir (ativação ou status)');
@@ -189,12 +200,11 @@ function showError(message) {
 
 function handleKeyboardShortcuts(e) {
     if (e.key === 'Escape' || e.key === 'Backspace') {
-        exitPlayerMode(); // Suporte para Backspace em TV box
+        exitPlayerMode();
     }
 }
 
 function updatePlayerStatus(message, status) {
-    // Status não será visível em TV box, mas mantido para depuração
     console.log(`Status: ${message} (${status})`);
 }
 
