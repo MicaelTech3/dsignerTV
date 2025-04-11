@@ -314,15 +314,21 @@ function showTvMedia(tvId) {
                 itemDiv.className = 'playlist-item';
                 itemDiv.dataset.index = index;
                 itemDiv.innerHTML = `
-                    <img src="${item.type === 'video' ? 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE3IDMuNUgxMHYzLjVIMTdWMy41ek0xMiAxM3Y3LjVoNS41aDEuNWExLjUgMS41IDAgMCAxIDEuNSAxLjV2MS41YzAgLjgzLS42NyAxLjUtMS41IDEuNWgtMy41di0zLjVIMTdWMjEuNWgtM3YxLjVoLTN2LTEuNWgtM3YtMS41YzAtLjgzLjY3LTEuNSAxLjUtMS41aDEuNWgtMS41djcuNUg3di03LjVIM3YxLjVoLTEuNWMtLjgzIDAtMS41LS42Ny0xLjUtMS41di0xLjVjMC0uODMuNjctMS41IDEuNS0xLjVoMS41djcuNUgxMHYtNy41SDd2My41SDMuNWMtLjgzIDAtMS41LS42Ny0xLjUtMS41di0zLjVhMS41IDEuNSAwIDAgMSAxLjUtMS41aDMuNXYzLjVIMTB2LTMuNWgtM3YtMS41YzAtLjgzLjY3LTEuNSAxLjUtMS41aDEuNWgtMS41djMuNUgxN3YtMy41aC0zdi0xLjVjMC0uODMuNjctMS41IDEuNS0xLjVoMS41YzAgMCAzLjUgMCAzLjUgMHYzLjV6Ii8+PC9zdmc+' : item.url}" alt="${item.type}" style="width: 100px; height: 100px; object-fit: cover;">
-                    <div>
-                        <p>Tipo: ${item.type}</p>
-                        <p>Duração: <input type="number" class="playlist-duration" value="${item.duration || 10}" min="1" ${item.type === 'video' ? 'disabled' : ''}> seg</p>
-                        <button class="move-up-btn" ${index === 0 ? 'disabled' : ''}>⬆</button>
-                        <button class="move-down-btn" ${index === playlistItems.length - 1 ? 'disabled' : ''}>⬇</button>
-                        <button class="remove-item-btn">🗑</button>
-                    </div>
-                `;
+                <img src="${item.type === 'video' ? 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE3IDMuNUgxMHYzLjVIMTdWMy41ek0xMiAxM3Y3LjVoNS41aDEuNWExLjUgMS41IDAgMCAxIDEuNSAxLjV2MS41YzAgLjgzLS42NyAxLjUtMS41IDEuNWgtMy41di0zLjVIMTdWMjEuNWgtM3YxLjVoLTN2LTEuNWgtM3YtMS41YzAtLjgzLjY3LTEuNSAxLjUtMS41aDEuNWgtMS41djcuNUg3di03LjVIM3YxLjVoLTEuNWMtLjgzIDAtMS41LS42Ny0xLjUtMS41di0xLjVjMC0uODMuNjctMS41IDEuNS0xLjVoMS41djcuNUgxMHYtNy41SDd2My41SDMuNWMtLjgzIDAtMS41LS42Ny0xLjUtMS41di0zLjVhMS41IDEuNSAwIDAgMSAxLjUtMS41aDMuNXYzLjVIMTB2LTMuNWgtM3YtMS41YzAtLjgzLjY3LTEuNSAxLjUtMS41aDEuNWgtMS41djMuNUgxN3YtMy41aC0zdi0xLjVjMC0uODMuNjctMS41IDEuNS0xLjVoMS41YzAgMCAzLjUgMCAzLjUgMHYzLjV6Ii8+PC9zdmc+' : item.url}" alt="${item.type}" style="width: 100px; height: 100px; object-fit: cover;">
+                <div>
+                    <p>Tipo: ${item.type}</p>
+                    <p>Duração: <input type="number" class="playlist-duration" value="${item.duration || 10}" min="1" ${item.type === 'video' ? 'disabled' : ''}> seg</p>
+                    <button class="move-up-btn" ${index === 0 ? 'disabled' : ''} title="Mover para cima">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#00d4ff"><path d="M12 8l-6 6h12l-6-6z"/></svg>
+                    </button>
+                    <button class="move-down-btn" ${index === playlistItems.length - 1 ? 'disabled' : ''} title="Mover para baixo">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#00d4ff"><path d="M12 16l6-6H6l6 6z"/></svg>
+                    </button>
+                    <button class="remove-item-btn" title="Remover item">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#ff5252"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                </div>
+            `;
                 playlistView.appendChild(itemDiv);
             });
         };
