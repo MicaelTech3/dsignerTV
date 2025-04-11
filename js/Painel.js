@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dskeyBtn) {
         dskeyBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = 'https://dsignertv.web.app/dskey.html';
+            window.location.href = 'https://dsignertv.web.app/dskey/dskey.html';
         });
     }
 
