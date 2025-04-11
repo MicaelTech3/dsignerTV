@@ -1,9 +1,9 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', Arial, sans-serif; /* Fonte mais moderna */
     background-color: #1a1f3b;
-    color: white;
+    color: rgb(12, 186, 255);
     height: 100vh;
     overflow: hidden;
     display: flex;
@@ -31,8 +31,8 @@ body {
 }
 
 .key-display {
-    background-color: #0a0f2b;
-    border: 1px dashed #00d4ff;
+    background-color: #000000;
+    border: 2px dashed #010202;
     border-radius: 5px;
     padding: 20px;
     margin: 20px 0;
@@ -43,12 +43,29 @@ body {
 }
 
 .description {
-    font-size: 1.1rem;
+    font-size: 1.2rem; /* Aumentado para legibilidade */
+    font-weight: 400;
+    line-height: 1.6;
     margin-bottom: 20px;
+    background: linear-gradient(90deg, rgba(0, 212, 255, 0.1), rgba(255, 255, 255, 0.1)); /* Fundo sutil */
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra leve para profundidade */
+}
+
+.link-part1 {
+    color: #000000; /* Ciano vibrante para a primeira parte */
+    font-weight: bold;
+}
+
+.link-part2 {
+    color: #ffffff; /* Rosa vibrante para a segunda parte */
+    font-weight: bold;
+    
 }
 
 .btn {
-    background-color: #00d4ff;
+    background-color: #1896af;
     color: #0a0f2b;
     border: none;
     padding: 12px 20px;
@@ -60,7 +77,11 @@ body {
 }
 
 .btn-view {
-    background-color: #4CAF50;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+    margin-bottom: 10px;
 }
 
 #player-mode {
@@ -92,7 +113,7 @@ body {
 #media-display iframe {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Alterado para 'contain' para evitar cortes em TV box */
+    object-fit: contain;
     position: absolute;
     top: 0;
     left: 0;
@@ -109,11 +130,11 @@ body {
 }
 
 .media-info {
-    display: none; /* Escondido por padrão em TV box */
+    display: none;
 }
 
 .connection-status {
-    display: none; /* Escondido por padrão em TV box */
+    display: none;
 }
 
 .fullscreen-mode {
