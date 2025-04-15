@@ -6,53 +6,12 @@
     <title>Dsigner - Painel</title>
     <link rel="stylesheet" href="css/Painel.css">
     <style>
-        /* Additional styles for new features */
-        .new-key-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .new-key-btn:hover {
-            background: #45a049;
-        }
-
-        #text-options textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        #text-options label {
-            display: inline-block;
-            margin-right: 15px;
-            margin-top: 10px;
-        }
-
-        #activation-key-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .text-message {
-            padding: 20px;
-            background: #2a2f5b;
-            border-radius: 10px;
-            color: white;
-            font-size: 24px;
-            max-width: 80%;
-            margin: 0 auto;
-            text-align: center;
-        }
+      
     </style>
 </head>
 <body>
+    <div id="connection-status"></div>
+
     <header class="painel-header">
         <div class="header-content">
             <div class="header-title">
@@ -144,11 +103,7 @@
                     <label for="new-category-name">Nome do Andar:</label>
                     <input type="text" id="new-category-name" placeholder="Ex.: Andar 3">
                 </div>
-                <button id="add-category-btn">Adicionar Andar</button>
-            </div>
-            <div class="category-list-modal">
-                <h3>Andares Existentes</h3>
-                <ul id="existing-categories"></ul>
+                <button id="add-category-btn" class="btn">Adicionar Andar</button>
             </div>
         </div>
     </div>
@@ -161,24 +116,7 @@
                 <label for="edit-floor-name">Nome do Andar:</label>
                 <input type="text" id="edit-floor-name">
             </div>
-            <button id="save-floor-btn">Salvar</button>
-        </div>
-    </div>
-
-    <div class="modal" id="image-control-modal">
-        <div class="modal-content">
-            <span class="close-btn">×</span>
-            <h2>Controle de Imagem</h2>
-            <div class="form-group">
-                <label for="image-duration-control">Duração (segundos):</label>
-                <input type="number" id="image-duration-control" min="1" value="10">
-            </div>
-            <div class="form-group">
-                <label>Pré-visualização:</label>
-                <img id="current-image-preview" class="media-preview">
-            </div>
-            <button id="update-image-btn" class="btn">Atualizar Imagem</button>
-            <button id="change-image-btn" class="btn btn-secondary">Alterar Imagem</button>
+            <button id="save-floor-btn" class="btn">Salvar</button>
         </div>
     </div>
 
@@ -195,8 +133,8 @@
                 <select id="tv-category"></select>
             </div>
             <div class="form-group">
-                <label for="tv-activation-key">Chave de Ativação (Obrigatório):</label>
-                <input type="text" id="tv-activation-key" placeholder="Cole a chave do Dskey aqui">
+                <label for="tv-activation-key">Chave de Ativação:</label>
+                <input type="text" id="tv-activation-key" placeholder="Cole a chave do Dskey aqui" required>
             </div>
             <button id="add-tv-submit-btn" class="btn">Adicionar TV</button>
         </div>
@@ -221,35 +159,7 @@
                     <option value="image">Imagem</option>
                     <option value="video">Vídeo</option>
                     <option value="link">Link Externo</option>
-                </select>
-            </div>
-            
-            <div id="text-options" class="form-group" style="display:none;">
-                <textarea id="text-content" placeholder="Digite sua mensagem..."></textarea>
-                <label>Cor do Texto: <input type="color" id="text-color" value="#ffffff"></label>
-                <label>Cor de Fundo: <input type="color" id="text-bg-color" value="#1a1f3b"></label>
-                <label>Tamanho: 
-                    <select id="text-size">
-                        <option value="16">Pequeno</option>
-                        <option value="24" selected>Médio</option>
-                        <option value="32">Grande</option>
-                        <option value="48">Extra Grande</option>
-                    </select>
-                </label>
-            </div>
-            <div id="playlist-group" style="display: none;">
-                <label for="playlist-files">Escolha os arquivos da playlist:</label>
-                <input type="file" id="playlist-files" accept="image/*,video/mp4,.gif" multiple>
-            </div>
-
-            <div id="playlist-modal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <span class="close-btn">&times;</span>
-                    <h2>Criar Playlist</h2>
-                    <div id="playlist-items">
-                        <input type="file" id="playlist-files" accept="image/*,video/mp4,.gif" multiple>
-                        <div id="playlist-preview"></div>
-                        <button id="save-playlist-btn" class="btn">Salvar Playlist</button>
+                    <option value="playlist">Playlist</option>
                     </div>
                 </div>
             </div>

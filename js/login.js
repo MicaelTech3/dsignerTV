@@ -1,12 +1,11 @@
 // Configuração do Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyBhj6nv3QcIHyuznWPNM4t_0NjL0ghMwFw",
-    authDomain: "dsignertv.firebaseapp.com",
-    databaseURL: "https://dsignertv-default-rtdb.firebaseio.com",
-    projectId: "dsignertv",
-    storageBucket: "dsignertv.firebasestorage.app",
-    messagingSenderId: "930311416952",
-    appId: "1:930311416952:web:d0e7289f0688c46492d18d"
+    apiKey: "AIzaSyD79Pmy2mF1lbwYcMkZ82-cWLCeZhR-wHg",
+    authDomain: "dsplay-ed00c.firebaseapp.com",
+    projectId: "dsplay-ed00c",
+    storageBucket: "dsplay-ed00c.firebasestorage.app",
+    messagingSenderId: "769189108589",
+    appId: "1:769189108589:web:fe53f4d3462fd538071864"
 };
 
 // Inicialização do Firebase
